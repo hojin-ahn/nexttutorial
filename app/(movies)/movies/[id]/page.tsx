@@ -1,4 +1,19 @@
+import { Suspense } from "react";
 import { API_URL } from "../../../(home)/page";
+import MovieInfo from "../../../../components/movie-info";
+import MovieVideos from "../../../../components/movie-videos";
+
+
+interface IParams {
+    params: { id: string };
+}
+
+export async function generateMetadata({ params: { id } }: IParams) {
+    const movie = await getMovie(id);
+    return {
+        title: movie.title,
+    };
+}
 
 async function getMovie(id: string) {
     console.log(`Fetching movides: ${Date.now()}`);
@@ -14,9 +29,14 @@ async function getVideos(id: string) {
     return response.json();
 }
 
-export default async function MovieDetail({ params: { id } }: { params: { id: string } }) {
-    console.log(`start fetching`);
-    const movie = await getMovie(id);
-    const videos = await getVideos(id);
-    return <h1>{movie.title}</h1>;
+export default async function MovieDetail({ params: { id } }: IParams) {
+
+    return (<div>
+        <Suspense fallback={<h1>Loading movie info</h1>}>
+            <MovieInfo id={id} />
+        </Suspense>
+        <Suspense fallback={<h1>Loading movie videos</h1>}>
+            <MovieVideos id={id} />
+        </Suspense>
+    </div>);
 }
